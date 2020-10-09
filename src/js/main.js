@@ -12,11 +12,7 @@ var worldWidth = 10000;
 function setup() {
     createCanvas(1000,1000);
     player = new Player('Player', worldWidth/2, worldHeight/2, 96, getRandomColor());
-    for (var i = 0; i < 1000; i++) {
-        var x = random(0, worldWidth);
-        var y = random(0, worldHeight);
-        blobs[i] = new Blob(x, y, 24, getRandomColor());
-    }
+    populate();
     // noLoop();
 }
 
@@ -46,4 +42,14 @@ function draw() {
 
     player.show();
     player.update();
+    populate();
+    console.log(blobs.length);
+}
+
+function populate() {
+    for(var i=blobs.length; i < 1000; i++) {
+        var x = random(0, worldWidth);
+        var y = random(0, worldHeight);
+        blobs[i] = new Blob(x, y, 24, getRandomColor());
+    }
 }
