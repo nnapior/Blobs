@@ -1,0 +1,14 @@
+.header {
+    margin-top: 18rem;
+    text-align: center;
+    margin-bottom: 8rem;
+}
+
+#GameFrame {
+    border: none;
+    margin-bottom: 8rem;
+}
+
+section {
+    border-bottom: 1px solid #eee;
+}
