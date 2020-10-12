@@ -42,25 +42,12 @@ io.sockets.on('connection', function(socket) {
           blobs[i] = new Blob(x, y, 24, Math.random()*255, Math.random()*255, Math.random()*255);
         }
       }
-
-      for(var [id, player] of Object.entries(playerBlobs)) {
-        if(id != socket.id && playerBlobs[socket.id].eats(player)) {
-          //console.log(playerBlobs[socket.id].name + ' ate ' + player.name);
-          socket.emit('endgame', id);
-        }
-        else if(id != socket.id && player.eats(playerBlobs[socket.id])) {
-          //console.log(player.name + ' ate ' + playerBlobs[i]);
-        }
-        else {
-          //console.log('no one ate.');
-        }
-      }
-
     });
 
     socket.on('disconnect', function() {
       console.log('Client has disconnected');
-      delete playerBlobs[socket.id];
+      if(playerBlobs[socket.id] in playerBlobs)
+        delete playerBlobs[socket.id];
     });
   });
 
@@ -96,6 +83,12 @@ io.sockets.on('connection', function(socket) {
         }
       }
 
+  }
+
+  function eatup() {
+    for(var [id, player] of Object.entries(playerBlobs)) {
+      
+    }
   }
 
   function populate() {

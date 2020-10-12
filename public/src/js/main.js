@@ -87,6 +87,7 @@ function draw() {
       player.r = blob.r;
     }
   }
+
   if(socket != null) {
     player.show();
     player.update();
