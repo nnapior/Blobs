@@ -1,10 +1,3 @@
-// server.js
-// where your node app starts
-
-// we've started you off with Express (https://expressjs.com/)
-// but feel free to use whatever libraries or frameworks you'd like through `package.json`.
-
-
 
 const express = require("express");
 const app = express();
@@ -22,16 +15,13 @@ populate();
 var server = app.listen(8080);
 var io = require('socket.io')(server);
 
-setInterval(playerHeartbeat, 33);
-setInterval(blobHeartbeat, 50);
+app.get('/blobs', (request, response) => {
+  response.json(blobs);
+});
 
-function playerHeartbeat() {
-  io.sockets.emit('playerHeartbeat', playerBlobs);
-}
-
-function blobHeartbeat() {
-  io.sockets.emit('blobHeartbeat', blobs);
-}
+app.get('/players', (request, response) => {
+  response.json(playerBlobs);
+});
 
 io.sockets.on('connection', function(socket) {
     console.log('new client: ' + socket.id);
@@ -42,28 +32,9 @@ io.sockets.on('connection', function(socket) {
     });
 
     socket.on('update', function(data) {
-      //console.log(socket.id + " " + data.x + " " + data.y + " " + data.r);
-      // var blob;
-      // for (var i = 0; i < playerBlobs.length; i++) {
-      //   if (socket.id == playerBlobs[i].id) {
-      //     blob = playerBlobs[i];
-      //   }
-      // }
-      // blob.x = data.x;
-      // blob.y = data.y;
-      // blob.r = data.r;
       playerBlobs[socket.id].x = data.x;
       playerBlobs[socket.id].y = data.y;
       playerBlobs[socket.id].r = data.r;
-    });
-
-    socket.on('ateBlob', function(data) {
-      blobs[data].x = Math.random()*worldWidth;
-      blobs[data].y = Math.random()*worldHeight;
-    });
-
-    socket.on('atePlayer', function(data) {
-
     });
 
     socket.on('disconnect', function() {

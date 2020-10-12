@@ -1,7 +1,6 @@
 
 var player;
-var playerBlobs = {};
-var blobs = [];
+var clientBlobs = [];
 
 var canvasHeight = 1000;
 var canvasWidth = 1000;
@@ -22,8 +21,9 @@ function setup() {
 }
 
 function startGame() {
-  socket = io.connect('https://blobs.nicknapior.com:443');
-  if (input.value() != null)
+  //socket = io.connect('https://blobs.nicknapior.com:443');
+  socket = io.connect('http://localhost:8080');
+  if (input.value() != '')
     player = new Player(input.value(), random(0, worldWidth), random(0, worldHeight), 96, getRandomColor());
   else
     player = new Player('Blob', random(0, worldWidth), random(0, worldHeight), 96, getRandomColor());
@@ -40,14 +40,6 @@ function startGame() {
     blue : blue(player.color)
   };
   socket.emit('start', data);
-  socket.on('playerHeartbeat', function(data) {
-    //console.log(data);
-    playerBlobs = data;
-  });
-  socket.on('blobHeartbeat', function(data) {
-    //console.log(data);
-    blobs = data;
-  });
   loop();
 }
 
@@ -59,26 +51,6 @@ function draw() {
   scale(player.zoom);
   translate(-player.pos.x, -player.pos.y);
 
-  var ateBlobs = []
-  for (var i = blobs.length - 1; i >= 0; i--) {
-    fill(blobs[i].red, blobs[i].green, blobs[i].blue);
-    ellipse(blobs[i].x, blobs[i].y, blobs[i].r*2, blobs[i].r*2);
-    if (player.eats(blobs[i])) {
-      socket.emit('ateBlob', i);
-    }
-  }
-
-  for (const [id, playerBlob] of Object.entries(playerBlobs)) {
-    if (id != socket.id) {
-      fill(playerBlob.red, playerBlob.green, playerBlob.blue);
-      ellipse(playerBlob.x, playerBlob.y, playerBlob.r*2, playerBlob.r*2);
-      textSize(0.4*playerBlob.r);
-      textAlign(CENTER, CENTER);
-      fill(255);
-      text(playerBlob.name, playerBlob.x, playerBlob.y);
-    }
-  }
-
   if(player.pos.x >= worldWidth)
     player.pos.x = worldWidth;
   if(player.pos.x <= 0)
@@ -88,9 +60,17 @@ function draw() {
   if(player.pos.y <= 0)
     player.pos.y = 0;
 
+    $.getJSON('http://localhost:8080/blobs', function(data) {
+      for(var i=0; i<data.length; i++) {
+        fill(data[i].red, data[i].green, data[i].blue);
+        ellipse(data[i].x, data[i].y, data[i].r*2, data[i].r * 2);
+      }
+    });
+
+    console.log(player);
+
   player.show();
   player.update();
-
   var data = {
     name : player.name,
     x : player.pos.x,
@@ -98,7 +78,6 @@ function draw() {
     r : player.r
   };
   socket.emit('update', data);
-  // console.log(blobs.length);
 }
 
 function getRandomColor() {
