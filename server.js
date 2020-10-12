@@ -34,7 +34,28 @@ io.sockets.on('connection', function(socket) {
     socket.on('update', function(data) {
       playerBlobs[socket.id].x = data.x;
       playerBlobs[socket.id].y = data.y;
-      playerBlobs[socket.id].r = data.r;
+
+      for(var i=0; i<blobs.length; i++) {
+        if(playerBlobs[socket.id].eats(blobs[i])) {
+          var x = Math.random()*worldWidth;
+          var y = Math.random()*worldHeight;
+          blobs[i] = new Blob(x, y, 24, Math.random()*255, Math.random()*255, Math.random()*255);
+        }
+      }
+
+      for(var [id, player] of Object.entries(playerBlobs)) {
+        if(id != socket.id && playerBlobs[socket.id].eats(player)) {
+          //console.log(playerBlobs[socket.id].name + ' ate ' + player.name);
+          socket.emit('endgame', id);
+        }
+        else if(id != socket.id && player.eats(playerBlobs[socket.id])) {
+          //console.log(player.name + ' ate ' + playerBlobs[i]);
+        }
+        else {
+          //console.log('no one ate.');
+        }
+      }
+
     });
 
     socket.on('disconnect', function() {
@@ -60,6 +81,21 @@ io.sockets.on('connection', function(socket) {
       this.red = red;
       this.green = green;
       this.blue = blue;
+
+      this.eats = function(other) {
+        var a = this.x - other.x;
+        var b = this.y - other.y;
+        var d = Math.sqrt(a*a + b*b);
+        if (d < this.r + other.r && this.r*0.8 > other.r) {
+            var sum = Math.PI*this.r*this.r+Math.PI*other.r*other.r;
+            radius = Math.sqrt(sum / Math.PI);
+            this.r = radius;
+            return true;
+        } else {
+            return false;
+        }
+      }
+
   }
 
   function populate() {

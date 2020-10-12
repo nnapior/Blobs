@@ -1,3 +1,4 @@
+var socket;
 
 var player;
 var players = {};
@@ -18,16 +19,21 @@ function setup() {
   play = createButton('play');
   play.position(input.x + input.width+5, canvasWidth/2);
   play.mousePressed(startGame);
+  player = new Player('Blob', random(0, worldWidth), random(0, worldHeight), 96, getRandomColor());
   noLoop();
+  setInterval(function(){$.getJSON('http://localhost:8080/blobs', function(data) {
+    blobs = data;
+  })}, 50);
+  setInterval(function(){$.getJSON('http://localhost:8080/players', function(data) {
+    players = data;
+  })}, 33);
 }
 
 function startGame() {
   //socket = io.connect('https://blobs.nicknapior.com:443');
   socket = io.connect('http://localhost:8080');
   if (input.value() != '')
-    player = new Player(input.value(), random(0, worldWidth), random(0, worldHeight), 96, getRandomColor());
-  else
-    player = new Player('Blob', random(0, worldWidth), random(0, worldHeight), 96, getRandomColor());
+    player.name = input.value();
   input.remove();
   play.remove();
 
@@ -41,12 +47,6 @@ function startGame() {
     blue : blue(player.color)
   };
   socket.emit('start', data);
-  setInterval(function(){$.getJSON('http://localhost:8080/blobs', function(data) {
-    blobs = data;
-  })}, 50);
-  setInterval(function(){$.getJSON('http://localhost:8080/players', function(data) {
-    players = data;
-  })}, 33);
   loop();
 }
 
@@ -74,7 +74,7 @@ function draw() {
 
   for(var [id, blob] of Object.entries(players)) {
     if(id != socket.id) {
-      console.log(blob.x + " " + blob.y);
+      //console.log(blob.x + " " + blob.y);
       fill(blob.red, blob.green, blob.blue);
       ellipse(blob.x, blob.y, blob.r*2, blob.r*2);
 
@@ -83,17 +83,20 @@ function draw() {
       fill(255);
       text(blob.name, blob.x, blob.y);
     }
+    else if(id == socket.id){
+      player.r = blob.r;
+    }
   }
-
-  player.show();
-  player.update();
-  var data = {
-    name : player.name,
-    x : player.pos.x,
-    y : player.pos.y,
-    r : player.r
-  };
-  socket.emit('update', data);
+  if(socket != null) {
+    player.show();
+    player.update();
+    var data = {
+      name : player.name,
+      x : player.pos.x,
+      y : player.pos.y
+    }
+    socket.emit('update', data);
+  }
 }
 
 function getRandomColor() {
