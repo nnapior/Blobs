@@ -1,6 +1,7 @@
 
 var player;
-var clientBlobs = [];
+var players = {};
+var blobs = [];
 
 var canvasHeight = 1000;
 var canvasWidth = 1000;
@@ -40,6 +41,12 @@ function startGame() {
     blue : blue(player.color)
   };
   socket.emit('start', data);
+  setInterval(function(){$.getJSON('http://localhost:8080/blobs', function(data) {
+    blobs = data;
+  })}, 50);
+  setInterval(function(){$.getJSON('http://localhost:8080/players', function(data) {
+    players = data;
+  })}, 33);
   loop();
 }
 
@@ -60,14 +67,23 @@ function draw() {
   if(player.pos.y <= 0)
     player.pos.y = 0;
 
-    $.getJSON('http://localhost:8080/blobs', function(data) {
-      for(var i=0; i<data.length; i++) {
-        fill(data[i].red, data[i].green, data[i].blue);
-        ellipse(data[i].x, data[i].y, data[i].r*2, data[i].r * 2);
-      }
-    });
+  for(var i=0; i<blobs.length; i++) {
+    fill(blobs[i].red, blobs[i].green, blobs[i].blue);
+    ellipse(blobs[i].x, blobs[i].y, blobs[i].r*2, blobs[i].r * 2);
+  }
 
-    console.log(player);
+  for(var [id, blob] of Object.entries(players)) {
+    if(id != socket.id) {
+      console.log(blob.x + " " + blob.y);
+      fill(blob.red, blob.green, blob.blue);
+      ellipse(blob.x, blob.y, blob.r*2, blob.r*2);
+
+      textSize(0.4*blob.r);
+      textAlign(CENTER, CENTER);
+      fill(255);
+      text(blob.name, blob.x, blob.y);
+    }
+  }
 
   player.show();
   player.update();
@@ -81,5 +97,5 @@ function draw() {
 }
 
 function getRandomColor() {
-    return color(random(5, 245), random(5, 245), random(5, 245))
+  return color(random(5, 245), random(5, 245), random(5, 245))
 }
