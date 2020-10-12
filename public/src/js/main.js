@@ -22,7 +22,7 @@ function setup() {
 }
 
 function startGame() {
-  socket = io.connect('http://10.1.10.6:3000');
+  socket = io.connect('https://blobs.nicknapior.com:443');
   if (input.value() != null)
     player = new Player(input.value(), random(0, worldWidth), random(0, worldHeight), 96, getRandomColor());
   else

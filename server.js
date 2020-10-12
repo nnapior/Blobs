@@ -19,7 +19,7 @@ var worldWidth = 10000;
 // https://expressjs.com/en/starter/static-files.html
 app.use(express.static("public"));
 populate();
-var server = app.listen(3000);
+var server = app.listen(8080);
 var io = require('socket.io')(server);
 
 setInterval(playerHeartbeat, 33);
