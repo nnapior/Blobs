@@ -1,21 +1,20 @@
 var socket;
-
-var url = 'https://blobs.nicknapior.com:443'
+//const url = 'https://blobs.nicknapior.com:443';
+const url = 'http://10.1.10.6:8080';
 
 var player;
 var players = {};
 var blobs = [];
 var ate = [];
 
-var canvasHeight = 1000;
-var canvasWidth = 1000;
+const canvasWidth = 1000;
+const canvasHeight = 1000;
 
-var worldHeight = 10000;
-var worldWidth = 10000;
+const worldHeight = 10000;
+const worldWidth = 10000;
 
 function setup() {
     createCanvas(1000,1000);
-
     input = createInput();
     input.position(canvasWidth/2-120, canvasWidth/2);
 
@@ -24,16 +23,15 @@ function setup() {
     play.mousePressed(startGame);
     player = new Player('Blob', random(0, worldWidth), random(0, worldHeight), 96, getRandomColor());
     noLoop();
-    setInterval(function(){$.getJSON(url+'/blobs', function(data) {
-        blobs = data;
-    })}, 100);
-    setInterval(function(){$.getJSON(url'/players', function(data) {
-        players = data;
-    })}, 33);
+    // setInterval(function(){$.getJSON(url+'/blobs', function(data) {
+    //     blobs = data;
+    // })}, 100);
+    // setInterval(function(){$.getJSON(url+'/players', function(data) {
+    //     players = data;
+    // })}, 33);
 }
 
 function startGame() {
-    //socket = io.connect('https://blobs.nicknapior.com:443');
     socket = io.connect(url);
     if (input.value() != '')
     player.name = input.value();
@@ -50,11 +48,15 @@ function startGame() {
         blue : blue(player.color)
     };
     socket.emit('start', data);
+    socket.on('heartbeat', function(data) {
+      //console.log(data);
+      players = data.players;
+      blobs = data.blobs;
+    });
     loop();
 }
 
 function draw() {
-    console.log(players)
     background(0);
     translate(width / 2, height / 2);
     var newzoom = 96 / player.r;
@@ -89,7 +91,8 @@ function draw() {
             if(eats(blob, player)) {
                 var data = {
                     eater : id,
-                    amount : player.r
+                    amount : player.r,
+                    eaten : socket.id
                 }
                 socket.emit('ate', data);
                 socket.disconnect();
