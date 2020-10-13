@@ -30,11 +30,11 @@ app.get('/ate', (request, response) => {
 
 setInterval(heartbeat, 33);
 function heartbeat() {
-  var data = {
-    players : players,
-    blobs : blobs
-  }
-  io.sockets.emit('heartbeat', data);
+    var data = {
+        players : players,
+        blobs : blobs
+    }
+    io.sockets.emit('heartbeat', data);
 }
 
 io.sockets.on('connection', function(socket) {
@@ -66,6 +66,7 @@ io.sockets.on('connection', function(socket) {
             var sum = Math.PI*players[data.eater].r*players[data.eater].r+Math.PI*data.amount*data.amount;
             radius = Math.sqrt(sum / Math.PI);
             players[data.eater].r = radius;
+            ate.push(data.eaten);
         });
 
         socket.on('disconnect', function() {
@@ -91,7 +92,6 @@ io.sockets.on('connection', function(socket) {
         this.red = red;
         this.green = green;
         this.blue = blue;
-
     }
 
     function eats(blob1, blob2) {
