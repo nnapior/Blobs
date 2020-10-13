@@ -6,15 +6,15 @@ var players = {};
 var blobs = [];
 var ate = [];
 
-var worldHeight = 10000;
-var worldWidth = 10000;
+const worldHeight = 10000;
+const worldWidth = 10000;
 
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
 app.use(express.static("public"));
-populate();
 var server = app.listen(8080);
 var io = require('socket.io')(server);
+populate();
 
 app.get('/blobs', (request, response) => {
     response.json(blobs);
@@ -27,6 +27,15 @@ app.get('/players', (request, response) => {
 app.get('/ate', (request, response) => {
     response.json(ate);
 });
+
+setInterval(heartbeat, 33);
+function heartbeat() {
+    var data = {
+        players : players,
+        blobs : blobs
+    }
+    io.sockets.emit('heartbeat', data);
+}
 
 io.sockets.on('connection', function(socket) {
     console.log('new client: ' + socket.id);
@@ -41,7 +50,6 @@ io.sockets.on('connection', function(socket) {
         players[socket.id].y = data.y;
 
         for(var i=0; i<blobs.length; i++) {
-            //console.log(players[socket.id]);
             if(eats(players[socket.id], blobs[i])) {
                 var sum = Math.PI*players[socket.id].r*players[socket.id].r+Math.PI*blobs[i].r*blobs[i].r;
                 radius = Math.sqrt(sum / Math.PI);
@@ -58,6 +66,7 @@ io.sockets.on('connection', function(socket) {
             var sum = Math.PI*players[data.eater].r*players[data.eater].r+Math.PI*data.amount*data.amount;
             radius = Math.sqrt(sum / Math.PI);
             players[data.eater].r = radius;
+            ate.push(data.eaten);
         });
 
         socket.on('disconnect', function() {
@@ -83,7 +92,6 @@ io.sockets.on('connection', function(socket) {
         this.red = red;
         this.green = green;
         this.blue = blue;
-
     }
 
     function eats(blob1, blob2) {
