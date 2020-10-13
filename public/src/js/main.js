@@ -1,5 +1,7 @@
 var socket;
 
+var url = 'https://blobs.nicknapior.com:443'
+
 var player;
 var players = {};
 var blobs = [];
@@ -22,20 +24,17 @@ function setup() {
     play.mousePressed(startGame);
     player = new Player('Blob', random(0, worldWidth), random(0, worldHeight), 96, getRandomColor());
     noLoop();
-    setInterval(function(){$.getJSON('http://localhost:8080/blobs', function(data) {
+    setInterval(function(){$.getJSON(url+'/blobs', function(data) {
         blobs = data;
     })}, 100);
-    setInterval(function(){$.getJSON('http://localhost:8080/players', function(data) {
+    setInterval(function(){$.getJSON(url'/players', function(data) {
         players = data;
     })}, 33);
-    setInterval(function(){$.getJSON('http://localhost:8080/ate', function(data) {
-        ate = data;
-    })}, 150);
 }
 
 function startGame() {
     //socket = io.connect('https://blobs.nicknapior.com:443');
-    socket = io.connect('http://localhost:8080');
+    socket = io.connect(url);
     if (input.value() != '')
     player.name = input.value();
     input.remove();
