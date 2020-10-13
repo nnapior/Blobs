@@ -5,6 +5,8 @@
   <title>Blobs!</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://kit.fontawesome.com/8bc01852e7.js" crossorigin="anonymous"></script>
   <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/skeleton.css">
@@ -19,9 +21,27 @@
     <section class="game">
         <iframe id="GameFrame" height="1000" width="1000" src="game.html" title="Blobs!"></iframe>
     </section>
+    <section class="howto">
+        <h2 class="title">Info</h2>
+        <div class="value-props row">
+        <div class="four columns value-prop">
+          <i class="fas fa-mouse-pointer fa-7x value-img"></i>
+          The blob always stays in the middle and follows your mouse pointer.
+        </div>
+        <div class="four columns value-prop">
+          <i class="fas fa-utensils fa-7x value-img"></i>
+          Eat other blobs and grow in size.
+        </div>
+        <div class="four columns value-prop">
+          <i class="fas fa-user-friends fa-7x value-img"></i>
+          Play with friends and eat them too!
+        </div>
+      </div>
+    </section>
   </div>
-
-<!-- End Document
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-database.js"></script>
+  <script src="js/leaderboard.js"></script>
 </body>
 </html>
