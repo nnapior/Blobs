@@ -19,6 +19,7 @@ section {
 }
 .value-prop {
     margin-top: 1rem;
+    text-align: center;
 }
 .value-img {
     display: block;

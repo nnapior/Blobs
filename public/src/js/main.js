@@ -1,6 +1,6 @@
 var socket;
 //const url = 'https://blobs.nicknapior.com:443';
-const url = 'http://10.1.10.6:8080';
+const url = 'http://localhost:8080';
 
 var player;
 var players = {};
