@@ -2,8 +2,9 @@
 const express = require("express");
 const app = express();
 
-var playerBlobs = {};
+var players = {};
 var blobs = [];
+var ate = [];
 
 var worldHeight = 10000;
 var worldWidth = 10000;
@@ -16,85 +17,90 @@ var server = app.listen(8080);
 var io = require('socket.io')(server);
 
 app.get('/blobs', (request, response) => {
-  response.json(blobs);
+    response.json(blobs);
 });
 
 app.get('/players', (request, response) => {
-  response.json(playerBlobs);
+    response.json(players);
+});
+
+app.get('/ate', (request, response) => {
+    response.json(ate);
 });
 
 io.sockets.on('connection', function(socket) {
     console.log('new client: ' + socket.id);
 
     socket.on('start', function(data) {
-      var player = new Player(data.name, data.x, data.y, data.r, data.red, data.green, data.blue);
-      playerBlobs[socket.id] = player;
+        var player = new Player(data.name, data.x, data.y, data.r, data.red, data.green, data.blue);
+        players[socket.id] = player;
     });
 
     socket.on('update', function(data) {
-      playerBlobs[socket.id].x = data.x;
-      playerBlobs[socket.id].y = data.y;
+        players[socket.id].x = data.x;
+        players[socket.id].y = data.y;
 
-      for(var i=0; i<blobs.length; i++) {
-        if(playerBlobs[socket.id].eats(blobs[i])) {
-          var x = Math.random()*worldWidth;
-          var y = Math.random()*worldHeight;
-          blobs[i] = new Blob(x, y, 24, Math.random()*255, Math.random()*255, Math.random()*255);
+        for(var i=0; i<blobs.length; i++) {
+            //console.log(players[socket.id]);
+            if(eats(players[socket.id], blobs[i])) {
+                var sum = Math.PI*players[socket.id].r*players[socket.id].r+Math.PI*blobs[i].r*blobs[i].r;
+                radius = Math.sqrt(sum / Math.PI);
+                players[socket.id].r = radius;
+                var x = Math.random()*worldWidth;
+                var y = Math.random()*worldHeight;
+                blobs[i] = new Blob(x, y, 24, Math.random()*255, Math.random()*255, Math.random()*255);
+            }
         }
-      }
-    });
+        });
 
-    socket.on('disconnect', function() {
-      console.log('Client has disconnected');
-      if(playerBlobs[socket.id] in playerBlobs)
-        delete playerBlobs[socket.id];
-    });
-  });
-
-  function Blob(x, y, r, red, green, blue) {
-      this.x = x;
-      this.y = y;
-      this.r = r;
-      this.red = red;
-      this.green = green;
-      this.blue = blue;
-  }
-
-  function Player(name, x, y, r, red, green, blue) {
-      this.name = name;
-      this.x = x;
-      this.y = y;
-      this.r = r;
-      this.red = red;
-      this.green = green;
-      this.blue = blue;
-
-      this.eats = function(other) {
-        var a = this.x - other.x;
-        var b = this.y - other.y;
-        var d = Math.sqrt(a*a + b*b);
-        if (d < this.r + other.r && this.r*0.8 > other.r) {
-            var sum = Math.PI*this.r*this.r+Math.PI*other.r*other.r;
+    socket.on('ate', function(data) {
+            console.log(data);
+            var sum = Math.PI*players[data.eater].r*players[data.eater].r+Math.PI*data.amount*data.amount;
             radius = Math.sqrt(sum / Math.PI);
-            this.r = radius;
+            players[data.eater].r = radius;
+        });
+
+        socket.on('disconnect', function() {
+            console.log('Client has disconnected ' + socket.id);
+            delete players[socket.id];
+        });
+    });
+
+    function Blob(x, y, r, red, green, blue) {
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+    }
+
+    function Player(name, x, y, r, red, green, blue) {
+        this.name = name;
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+
+    }
+
+    function eats(blob1, blob2) {
+        var a = blob1.x - blob2.x;
+        var b = blob1.y - blob2.y;
+        var d = Math.sqrt(a*a + b*b);
+        if (d < blob1.r + blob2.r && blob1.r*0.9 > blob2.r) {
             return true;
         } else {
             return false;
         }
-      }
-
-  }
-
-  function eatup() {
-    for(var [id, player] of Object.entries(playerBlobs)) {
-      
     }
-  }
 
-  function populate() {
-    for(var i=blobs.length; i < 1000; i++) {
-      var x = Math.random()*worldWidth;
-      var y = Math.random()*worldHeight;
-      blobs[i] = new Blob(x, y, 24, Math.random()*255, Math.random()*255, Math.random()*255);
+    function populate() {
+        for(var i=blobs.length; i < 700; i++) {
+            var x = Math.random()*worldWidth;
+            var y = Math.random()*worldHeight;
+            blobs[i] = new Blob(x, y, 24, Math.random()*255, Math.random()*255, Math.random()*255);
+        }
     }
-  }
